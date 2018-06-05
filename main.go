@@ -62,8 +62,9 @@ func init() {
 				if (!ws) {
 					return false;
 				}
-				print("SEND: " + input.value);
-				ws.send(input.value);
+				var message = JSON.stringify({type:"123", data: input.value})
+                ws.send(message);
+                print("SEND: " + message);
 				return false;
 			};
 			document.getElementById("close").onclick = function(evt) {
@@ -109,25 +110,21 @@ func main() {
 			return
 		}
 		defer c.Close()
-		err = c.WriteJSON(Message{Type:"welcome", Data:"welcome to websocket"})
-		if err != nil {
-			log.Println("write:", err)
-			// break
+		for {
+			message := &Message {}
+			err := c.ReadJSON(message)
+			if err != nil {
+				log.Println("read:", err)
+				break
+			}
+			log.Printf("recv: %s", message)
+			// err = c.WriteJSON(Message{Type:"welcome", Data:"welcome to websocket"})
+			err = c.WriteJSON(message)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
 		}
-		log.Println("write back:", Message{Type:"welcome", Data:"welcome to websocket"})
-		// for {
-		// 	mt, message, err := c.ReadMessage()
-		// 	if err != nil {
-		// 		log.Println("read:", err)
-		// 		break
-		// 	}
-		// 	log.Printf("recv: %s", message)
-		// 	err = c.WriteJSON(Message{Type:"welcome", Data:"welcome to websocket"})
-		// 	if err != nil {
-		// 		log.Println("write:", err)
-		// 		break
-		// 	}
-		// }
 	}
 
 

@@ -37,8 +37,9 @@
                 if (!ws) {
                     return false;
                 }
-                print("SEND: " + input.value);
-                ws.send(input.value);
+                var message = JSON.stringify({type:"123", data: input.value})
+                ws.send(message);
+                print("SEND: " + message);
                 return false;
             };
             document.getElementById("close").onclick = function (evt) {

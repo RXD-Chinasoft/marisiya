@@ -16,7 +16,8 @@
                 if (ws) {
                     return false;
                 }
-                ws = new WebSocket("{{.}}");
+                // ws = new WebSocket("{{.}}");
+                ws = new WebSocket("ws://"+window.location.host+"ws");
                 ws.onopen = function (evt) {
                     print("OPEN");
                 }

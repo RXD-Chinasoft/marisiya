@@ -9,5 +9,5 @@ func AddFriend() {
 }
 
 func IsFriend() {
-	
+	log.Println("is friends")
 }

@@ -2,14 +2,17 @@ package main
 
 import (
 	"net/http"
-	"marisiya/db"
+	_ "marisiya/db"
 	. "marisiya/handlers"
+	. "marisiya/protocal"
 )
 
 func main() {
-	db.AddFriend() //test
-	http.HandleFunc("/ws", HandleWs)
-	http.HandleFunc("/", HandleHomeByTemplate)
+	messageChan := make(chan Message)
+	http.HandleFunc("/ws", HandleWsByChan(messageChan))
+	http.HandleFunc("/", HandleHomeByChan(messageChan))
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
+
+	http.HandleFunc("/isFriend", HandleIsFriend)
 	http.ListenAndServe(":8000", nil)
 }

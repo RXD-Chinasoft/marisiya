@@ -29,4 +29,9 @@ func init() {
 		fmt.Println("Successfully connected!")
 	}
 	dbHandler = db
+	
+	_, err = dbHandler.Exec("CREATE TABLE IF NOT EXISTS friends (uid integer, email character varying(100), friend integer ) WITH(OIDS=FALSE);")
+	if err != nil {
+		log.Printf("create table err %s", err)
+	}
 }

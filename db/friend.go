@@ -4,10 +4,10 @@ import (
 	"log"
 )
 
-func init() {
-	log.Println("hello friend")
+func AddFriend() {
+	log.Println(dbHandler)
 }
 
-func AddFriend() {
-	// log.Println(dbHandler)
+func IsFriend() {
+	
 }

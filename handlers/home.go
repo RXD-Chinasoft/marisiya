@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"log"
 	"html/template"
+	. "marisiya/protocal"
+	"marisiya/db"
 )
 
 func HandleHome(w http.ResponseWriter, r *http.Request) {
@@ -92,5 +94,23 @@ func HandleHomeByTemplate(w http.ResponseWriter, r *http.Request) {
 	err := homeTemplate.Execute(w, nil)
 	if err != nil {
 		log.Fatalln("template didn't execute: ", err)
+	}
+}
+
+func HandleHomeByChan(mchan <-chan Message) func (w http.ResponseWriter, r *http.Request) {
+	return func (w http.ResponseWriter, r *http.Request) {
+		homeTemplate := template.Must(template.New("home.html").ParseFiles("templates/home.html"))
+		err := homeTemplate.Execute(w, nil)
+		if err != nil {
+			log.Fatalln("template didn't execute: ", err)
+		}
+		go func() {
+			for {
+				message := <- mchan
+				log.Println(message)
+				db.AddFriend() //test
+			}
+		}()
+		
 	}
 }

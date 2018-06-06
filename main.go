@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"html/template"
+	"marisiya/db"
 )
 
 var upgrader = websocket.Upgrader{
@@ -100,7 +101,7 @@ func init() {
 
 
 func main() {
-	
+	db.Add()
 	var WSHandler = func(w http.ResponseWriter, r *http.Request) {
 		// fmt.Fprint(w, "hello" + time.Now().Format("2006-01-02 15:04:05"))
 		

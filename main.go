@@ -9,6 +9,7 @@ import (
 func main() {
 	db.AddFriend() //test
 	http.HandleFunc("/ws", HandleWs)
-	http.HandleFunc("/", HandleHome)
+	http.HandleFunc("/", HandleHomeByTemplate)
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	http.ListenAndServe(":8000", nil)
 }

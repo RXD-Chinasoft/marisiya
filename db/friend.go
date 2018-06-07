@@ -124,3 +124,33 @@ func GetFriends(mail string) (friends []int64, err error) {
 	friends = friend.Friends
 	return
 }
+
+func GetFriendsName(mail string) (friends []string, err error) {
+	var rfs []int64 //relation friends
+	rfs, err = GetFriends(mail)
+	if err != nil {
+		return
+	}
+	if len(rfs) == 0 {
+		log.Println("find no friends")
+		return
+	}
+	log.Printf("relation friends %v :", rfs)
+	var all []Friend // all friends
+	all, err = GetAll()
+	if err != nil {
+		return
+	}
+	log.Printf("all friends %s :", all)
+
+	friends = []string{}
+	for _, r := range rfs {
+		for _, v := range all {
+			log.Printf("friend %s :", v)
+			if r == v.Id {
+				friends = append(friends, v.Email)
+			}
+		}
+	}
+	return
+}

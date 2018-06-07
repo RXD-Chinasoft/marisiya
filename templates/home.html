@@ -1,23 +1,102 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <script>  
         window.addEventListener("load", function (evt) {
             var output = document.getElementById("output");
             var input = document.getElementById("input");
+            var email = document.getElementById("mail");
             var ws;
             var print = function (message) {
                 var d = document.createElement("div");
                 d.innerHTML = message;
                 output.appendChild(d);
             };
+            function createXMLHttpRequest() {
+                var xhr;
+                if (window.XMLHttpRequest) {
+                    xhr = new XMLHttpRequest();
+                    if (xhr.overrideMimeType)
+                        xhr.overrideMimeType('text/xml');
+                } else if (window.ActiveXObject) {
+                    xhr = new ActiveXObject('Microsoft.XMLHTTP');
+                }
+                return xhr;
+            }
+
+            function post(url, body, fnSucceed, fnFail, fnLoading) {
+                var xhr = createXMLHttpRequest();
+                if (xhr != null) {
+                    xhr.open("POST", url, true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.onreadystatechange = function () {
+                        // readyState 五种状态
+                        // 0 － （未初始化）调用了open()方法，未调用send()方法
+                        // 1 － （载入）send()方法,正在发送请求
+                        // 2 － （载入完成）send()方法执行完成，已经接收到全部响应内容
+                        // 3 － （交互）正在解析响应内容
+                        // 4 － （完成）响应内容解析完成
+                        if (xhr.readyState == 4) {
+                            if (xhr.status == 200) {
+                                if (fnSucceed)
+                                    fnSucceed(xhr.responseText);
+                            }
+                            else {
+                                if (fnFail)
+                                    fnFail("HTTP请求错误！错误码：" + xhr.status);
+                            }
+                        }
+                        else {
+                            if (fnLoading)
+                                fnLoading();
+                        }
+                    }
+                    xhr.send();
+                }
+            }
+
+            function getFriends() {
+                var xhr = createXMLHttpRequest();
+                if (xhr != null) {
+                    xhr.open("GET", "/friends", true);
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4) {
+                            if (xhr.status == 200) {
+                                console.log(xhr.responseText, JSON.parse(xhr.responseText))
+                                var friends = JSON.parse(xhr.responseText)
+                                var fsDom = document.getElementById("friends");
+                                var inputs = fsDom.getElementsByTagName("input");
+                                var l = inputs.length;
+                                for (var i = 0; i < l; i++)
+                                    inputs[0].remove();
+                                for (let index = 0; index < friends.length; index++) {
+                                    var friend = friends[index];
+                                    var div = document.createElement("div");
+                                    div.innerHTML = `<input type="checkbox" name="1" value="` + friend.email + `"> ` + friend.email + ``;
+                                    fsDom.appendChild(div);
+                                }
+                            }
+                            else {
+                            }
+                        }
+                        else {
+
+                        }
+                    }
+                    xhr.send();
+                }
+            }
+
+            getFriends();
+
             document.getElementById("open").onclick = function (evt) {
                 if (ws) {
                     return false;
                 }
                 // ws = new WebSocket("{{.}}");
-                ws = new WebSocket("ws://"+window.location.host+"/ws");
+                ws = new WebSocket("ws://" + window.location.host + "/ws");
                 ws.onopen = function (evt) {
                     print("OPEN");
                 }
@@ -37,7 +116,7 @@
                 if (!ws) {
                     return false;
                 }
-                var message = JSON.stringify({type:"123", data: input.value})
+                var message = JSON.stringify({ cmd: "other", type: "123", data: input.value })
                 ws.send(message);
                 print("SEND: " + message);
                 return false;
@@ -47,6 +126,21 @@
                     return false;
                 }
                 ws.close();
+                return false;
+            };
+
+            document.getElementById("add").onclick = function (evt) {
+                if (!ws) {
+                    return false;
+                }
+                var message = JSON.stringify({ cmd: "new", type: "new", data: email.value })
+                ws.send(message);
+                print("SEND: " + message);
+                return false;
+            };
+            document.getElementById("isFriend").onclick = function (evt) {
+                post("/isFriend", { friends: ['a', 'b'] });
+                evt.preventDefault();
                 return false;
             };
         });
@@ -61,11 +155,17 @@
                     close the connection. You can change the message and send multiple times.
                     <p>
                         <form>
-                            <button id="open">Open</button>
-                            <button id="close">Close</button>
+                            <input type="button" id="open" value="Open">
+                            <input type="button" id="close" value="Close">
                             <p>
-                                <input id="input" type="text" value="Hello world!">
-                                <button id="send">Send</button>
+                                <input id="mail" type="text" value="example@example.com">
+                                <input type="button" id="add" value="Add friend">
+                                <p>
+                                    <div id="friends"></div>
+                                    <input type="button" id="isFriend" value="Are they friends?">
+                                    <p>
+                                        <input id="input" type="text" value="Hello world!">
+                                        <input type="button" id="send" value="Send">
                         </form>
             </td>
             <td valign="top" width="50%">

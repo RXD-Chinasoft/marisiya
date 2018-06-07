@@ -30,7 +30,7 @@ func init() {
 	}
 	dbHandler = db
 	
-	_, err = dbHandler.Exec("CREATE TABLE IF NOT EXISTS friends (id integer, email character varying(100), friends integer[] ) WITH(OIDS=FALSE);")
+	_, err = dbHandler.Exec("CREATE TABLE IF NOT EXISTS friends (id serial NOT NULL, email character varying(100), friends integer[] ) WITH(OIDS=FALSE);")
 	if err != nil {
 		log.Printf("create table err %s", err)
 	}

@@ -32,14 +32,10 @@ func AddFriend(msg Message) (friend Friend, err error) {
 		log.Printf("interval error %s", err)
 		return
 	}
-	row = dbHandler.QueryRow("SELECT MAX(id) FROM friends;")
-	err = row.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
-	log.Println("begin insert ", friend.Id)
-	friend.Id = friend.Id + 1
 	friend.Email = v
 	friend.Friends = []int64{}
 	log.Println("begin insert ", friend.Id)
-	_, err = dbHandler.Exec("INSERT INTO friends (id, email, friends) VALUES ($1, $2, $3)", friend.Id, friend.Email, pq.Array(friend.Friends))
+	_, err = dbHandler.Exec("INSERT INTO friends (email, friends) VALUES ($1, $2)", friend.Email, pq.Array(friend.Friends))
 	if err != nil {
 		log.Printf("insert error %s", err)
 		return

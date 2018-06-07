@@ -34,7 +34,7 @@ func AddFriend(msg Message) (friend Friend, err error) {
 	}
 	log.Println("begin insert")
 	friend.Email = v
-	friend.Friends = []int64{1}
+	friend.Friends = []int64{}
 	_, err = dbHandler.Exec("INSERT INTO friends (id, email, friends) VALUES ($1, $2, $3)", friend.Id + 1, friend.Email, pq.Array(friend.Friends))
 	if err != nil {
 		log.Printf("insert error %s", err)

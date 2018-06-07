@@ -107,8 +107,7 @@ func HandleHomeByChan(mchan <-chan Message) func (w http.ResponseWriter, r *http
 		go func() {
 			for {
 				message := <- mchan
-				log.Println(message)
-				db.AddFriend() //test
+				db.AddFriend(message) //test
 			}
 		}()
 		

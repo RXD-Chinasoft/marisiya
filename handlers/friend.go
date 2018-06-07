@@ -15,10 +15,11 @@ func HandleIsFriend(w http.ResponseWriter, r *http.Request) {
 			log.Printf("err %s /n", res)
 		} else {
 			log.Printf("%s /n", res)
-			db.IsFriend([]string{}...)
+			db.IsFriend([]string{"a", "b"}...)
 		}
 		
 	} else {
-		http.NotFoundHandler()
+		// http.NotFoundHandler()
+		http.Error(w, http.StatusText(http.StatusBadRequest), 400)
 	}
 }

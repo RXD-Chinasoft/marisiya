@@ -6,6 +6,7 @@ import (
 	"log"
 	. "marisiya/model"
 	. "marisiya/protocal"
+	"github.com/lib/pq"
 )
 
 func AddFriend(msg Message) (friend Friend, err error) {
@@ -18,7 +19,7 @@ func AddFriend(msg Message) (friend Friend, err error) {
 	}
 	friend = Friend{}
 	row := dbHandler.QueryRow("SELECT * FROM friends WHERE email = $1", v)
-	err = row.Scan(&friend.Id, &friend.Email, &friend.Friend)
+	err = row.Scan(&friend.Id, &friend.Email, &friend.Friends)
 	switch {
 	case err == sql.ErrNoRows:
 		log.Printf("not found %s", msg.Data)
@@ -32,9 +33,9 @@ func AddFriend(msg Message) (friend Friend, err error) {
 	}
 	log.Println("begin insert")
 	friend.Email = v
-	_, err = dbHandler.Exec("INSERT INTO friends (id, email, friend) VALUES ($1, $2, $3)", friend.Id + 1, friend.Email, friend.Friend)
+	_, err = dbHandler.Exec("INSERT INTO friends (id, email, friends) VALUES ($1, $2, $3)", friend.Id + 1, friend.Email, pq.Array(friend.Friends))
 	if err != nil {
-		log.Println("insert error")
+		log.Printf("insert error %s", err)
 		return
 	}
 	return
@@ -52,7 +53,7 @@ func IsFriend(friends ...string) (hasFriend bool, err error) {
 	defer rows.Close()
 	for rows.Next() {
 		friend := &Friend{}
-		err := rows.Scan(friend.Id, friend.Email, friend.Friend)
+		err := rows.Scan(friend.Id, friend.Email, friend.Friends)
 		if err != nil {
 			// http.Error(w, http.StatusText(500), 500)
 			break

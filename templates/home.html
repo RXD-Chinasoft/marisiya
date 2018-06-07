@@ -53,7 +53,7 @@
                                 fnLoading();
                         }
                     }
-                    xhr.send();
+                    xhr.send(JSON.stringify(body));
                 }
             }
 
@@ -139,7 +139,19 @@
                 return false;
             };
             document.getElementById("isFriend").onclick = function (evt) {
-                post("/isFriend", { friends: ['a', 'b'] });
+                var fsDom = document.getElementById("friends");
+                var inputs = fsDom.getElementsByTagName("input");
+                var l = inputs.length;
+                var params = []
+                for (var i = 0; i < l; i++) {
+                    if (inputs[i].checked) {
+                        params.push(inputs[i].value)
+                    }
+                }
+                console.log(params)
+                if (params.length > 1) {
+                    post("/isFriend", { friends: params });
+                }
                 evt.preventDefault();
                 return false;
             };

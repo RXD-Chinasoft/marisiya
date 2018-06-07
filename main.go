@@ -14,5 +14,6 @@ func main() {
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 
 	http.HandleFunc("/isFriend", HandleIsFriend)
+	http.HandleFunc("/friends", HandleFriends)
 	http.ListenAndServe(":8000", nil)
 }

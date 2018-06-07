@@ -5,6 +5,7 @@ import (
 	"log"
 	"marisiya/db"
 	"io/ioutil"
+	"encoding/json"
 )
 
 func HandleIsFriend(w http.ResponseWriter, r *http.Request) {
@@ -21,5 +22,18 @@ func HandleIsFriend(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// http.NotFoundHandler()
 		http.Error(w, http.StatusText(http.StatusBadRequest), 400)
+	}
+}
+
+func HandleFriends(w http.ResponseWriter, r *http.Request) {
+	friends, err := db.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		log.Printf("friends all r : %v \n", friends)
+		if err1 := json.NewEncoder(w).Encode(friends); err1 != nil {
+			http.Error(w, http.StatusText(500), 500)
+		}
+		
 	}
 }

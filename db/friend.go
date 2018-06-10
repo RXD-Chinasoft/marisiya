@@ -86,7 +86,7 @@ func GetAll() ([]Friend, error) {
 	return list, err
 }
 
-func IsFriend(friends ...string) (isFriend bool, err error) {
+func IsFriend(friends ...int64) (isFriend bool, err error) {
 	if len(friends) < 1 {
 		err = errors.New("more friends required")
 		return
@@ -130,13 +130,13 @@ func IsFriend(friends ...string) (isFriend bool, err error) {
 	return
 }
 
-func GetFriends(mail string) (friends []int64, err error) {
+func GetFriends(id int64) (friends []int64, err error) {
 	friend := Friend{}
-	err = dbHandler.QueryRow("SELECT * FROM friends WHERE email = $1", mail).Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
+	err = dbHandler.QueryRow("SELECT * FROM friends WHERE id = $1", id).Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
 	switch {
 	case err == sql.ErrNoRows:
-		log.Printf("%s do not exist", mail)
-		err = errors.New(fmt.Sprintf("%s do not exist", mail))
+		log.Printf("%s do not exist", id)
+		err = errors.New(fmt.Sprintf("%s do not exist", id))
 		return
 	case err != nil:
 		err = errors.New(fmt.Sprintf("interval error :%s", err))

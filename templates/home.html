@@ -4,6 +4,34 @@
 <head>
     <meta charset="utf-8">
     <script>  
+        function selectHost(obj) {
+            var opt = obj.options[obj.selectedIndex];
+            console.log(opt.text, opt.value);
+            var friendsslaver = document.getElementById("friendsslaver");
+            var inputs = friendsslaver.getElementsByTagName("input");
+            for (let index = 0; index < inputs.length; index++) {
+                const element = inputs[index];
+                element.checked = false;
+            }
+        }
+        function toBeFriends() {
+            var inputs = friendsslaver.getElementsByTagName("input");
+            var friends = [];
+            for (let index = 0; index < inputs.length; index++) {
+                const element = inputs[index];
+                if (element.checked) {
+                    friends.push(element.value)
+                }
+            }
+            if (friends.length == 0) {
+                alert("no friend be selected")
+                return;
+            }
+            var obj = document.getElementById("host");
+            var opt = obj.options[obj.selectedIndex];
+            console.log(opt.value, friends)
+        }
+
         window.addEventListener("load", function (evt) {
             var output = document.getElementById("output");
             var input = document.getElementById("input");
@@ -67,15 +95,31 @@
                                 console.log(xhr.responseText, JSON.parse(xhr.responseText))
                                 var friends = JSON.parse(xhr.responseText)
                                 var fsDom = document.getElementById("friends");
+                                //clear
                                 var inputs = fsDom.getElementsByTagName("input");
                                 var l = inputs.length;
                                 for (var i = 0; i < l; i++)
                                     inputs[0].remove();
+                                //clear
+                                var friendsslaver = document.getElementById("friendsslaver");
+                                var host = document.getElementById("host");
+                                host.options.length = 0;
+
                                 for (let index = 0; index < friends.length; index++) {
                                     var friend = friends[index];
+
                                     var div = document.createElement("div");
-                                    div.innerHTML = `<input type="checkbox" name="1" value="` + friend.email + `"> ` + friend.email + ``;
+                                    div.innerHTML = `<input type="checkbox" name="1" value="` + friend.id + `"> ` + friend.email + ``;
                                     fsDom.appendChild(div);
+
+                                    var div1 = document.createElement("div");
+                                    div1.innerHTML = `<input type="checkbox" name="2" value="` + friend.id + `"> ` + friend.email + ``;
+                                    friendsslaver.appendChild(div1);
+
+                                    var option = document.createElement("option");
+                                    option.value = friend.id;
+                                    option.innerText = friend.email;
+                                    host.appendChild(option);
                                 }
                             }
                             else {
@@ -90,6 +134,8 @@
             }
 
             getFriends();
+
+
 
             document.getElementById("open").onclick = function (evt) {
                 if (ws) {
@@ -106,6 +152,7 @@
                 }
                 ws.onmessage = function (evt) {
                     print("RESPONSE: " + evt.data);
+                    getFriends();
                 }
                 ws.onerror = function (evt) {
                     print("ERROR: " + evt.data);
@@ -167,17 +214,25 @@
                     close the connection. You can change the message and send multiple times.
                     <p>
                         <form>
+                            <label>WebSocket:</label>
                             <input type="button" id="open" value="Open">
                             <input type="button" id="close" value="Close">
                             <p>
                                 <input id="mail" type="text" value="example@example.com">
                                 <input type="button" id="add" value="Add friend">
+                                <div id="friendsslaver">
+                                    <select id="host" onchange="selectHost(this)"></select>
+                                </div>
+                                <input type="button" id="toBefriends" onclick="toBeFriends()" value="To be friends">
+                                <hr>
+                                <p>relationship</p>
+                                <div id="friends"></div>
+                                <input type="button" id="isFriend" value="Are they friends?">
+                                <hr>
+                                <p>common friends</p>
                                 <p>
-                                    <div id="friends"></div>
-                                    <input type="button" id="isFriend" value="Are they friends?">
-                                    <p>
-                                        <input id="input" type="text" value="Hello world!">
-                                        <input type="button" id="send" value="Send">
+                                    <input id="input" type="text" value="Hello world!">
+                                    <input type="button" id="send" value="Send">
                         </form>
             </td>
             <td valign="top" width="50%">

@@ -4,6 +4,48 @@
 <head>
     <meta charset="utf-8">
     <script>  
+        function createXMLHttpRequest() {
+            var xhr;
+            if (window.XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+                if (xhr.overrideMimeType)
+                    xhr.overrideMimeType('text/xml');
+            } else if (window.ActiveXObject) {
+                xhr = new ActiveXObject('Microsoft.XMLHTTP');
+            }
+            return xhr;
+        }
+
+        function post(url, body, fnSucceed, fnFail, fnLoading) {
+            var xhr = createXMLHttpRequest();
+            if (xhr != null) {
+                xhr.open("POST", url, true);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.onreadystatechange = function () {
+                    // readyState 五种状态
+                    // 0 － （未初始化）调用了open()方法，未调用send()方法
+                    // 1 － （载入）send()方法,正在发送请求
+                    // 2 － （载入完成）send()方法执行完成，已经接收到全部响应内容
+                    // 3 － （交互）正在解析响应内容
+                    // 4 － （完成）响应内容解析完成
+                    if (xhr.readyState == 4) {
+                        if (xhr.status == 200) {
+                            if (fnSucceed)
+                                fnSucceed(xhr.responseText);
+                        }
+                        else {
+                            if (fnFail)
+                                fnFail("HTTP请求错误！错误码：" + xhr.status);
+                        }
+                    }
+                    else {
+                        if (fnLoading)
+                            fnLoading();
+                    }
+                }
+                xhr.send(JSON.stringify(body));
+            }
+        }
         function selectHost(obj) {
             var opt = obj.options[obj.selectedIndex];
             console.log(opt.text, opt.value);
@@ -12,24 +54,35 @@
             for (let index = 0; index < inputs.length; index++) {
                 const element = inputs[index];
                 element.checked = false;
+                element.parentElement.style.display = "block";
+                if (opt.value == element.value) {
+                    console.log(opt.value, element.value)
+                    element.parentElement.style.display = "none";
+                }
             }
         }
         function toBeFriends() {
+            var obj = document.getElementById("host");
+            if (!obj.selectedIndex) {
+                alert("no master be selected")
+                return
+            }
+            var opt = obj.options[obj.selectedIndex];
             var inputs = friendsslaver.getElementsByTagName("input");
             var friends = [];
             for (let index = 0; index < inputs.length; index++) {
                 const element = inputs[index];
                 if (element.checked) {
-                    friends.push(element.value)
+                    friends.push(parseInt(element.value))
                 }
             }
             if (friends.length == 0) {
                 alert("no friend be selected")
                 return;
             }
-            var obj = document.getElementById("host");
-            var opt = obj.options[obj.selectedIndex];
-            console.log(opt.value, friends)
+           
+            console.log(opt.text, friends)
+            post("/toBeFriends", { host: opt.text, friends });
         }
 
         window.addEventListener("load", function (evt) {
@@ -42,48 +95,7 @@
                 d.innerHTML = message;
                 output.appendChild(d);
             };
-            function createXMLHttpRequest() {
-                var xhr;
-                if (window.XMLHttpRequest) {
-                    xhr = new XMLHttpRequest();
-                    if (xhr.overrideMimeType)
-                        xhr.overrideMimeType('text/xml');
-                } else if (window.ActiveXObject) {
-                    xhr = new ActiveXObject('Microsoft.XMLHTTP');
-                }
-                return xhr;
-            }
 
-            function post(url, body, fnSucceed, fnFail, fnLoading) {
-                var xhr = createXMLHttpRequest();
-                if (xhr != null) {
-                    xhr.open("POST", url, true);
-                    xhr.setRequestHeader("Content-Type", "application/json");
-                    xhr.onreadystatechange = function () {
-                        // readyState 五种状态
-                        // 0 － （未初始化）调用了open()方法，未调用send()方法
-                        // 1 － （载入）send()方法,正在发送请求
-                        // 2 － （载入完成）send()方法执行完成，已经接收到全部响应内容
-                        // 3 － （交互）正在解析响应内容
-                        // 4 － （完成）响应内容解析完成
-                        if (xhr.readyState == 4) {
-                            if (xhr.status == 200) {
-                                if (fnSucceed)
-                                    fnSucceed(xhr.responseText);
-                            }
-                            else {
-                                if (fnFail)
-                                    fnFail("HTTP请求错误！错误码：" + xhr.status);
-                            }
-                        }
-                        else {
-                            if (fnLoading)
-                                fnLoading();
-                        }
-                    }
-                    xhr.send(JSON.stringify(body));
-                }
-            }
 
             function getFriends() {
                 var xhr = createXMLHttpRequest();
@@ -104,6 +116,10 @@
                                 var friendsslaver = document.getElementById("friendsslaver");
                                 var host = document.getElementById("host");
                                 host.options.length = 0;
+                                var option = document.createElement("option");
+                                option.value = 0;
+                                option.innerText = "";
+                                host.appendChild(option);
 
                                 for (let index = 0; index < friends.length; index++) {
                                     var friend = friends[index];

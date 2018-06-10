@@ -15,5 +15,6 @@ func main() {
 
 	http.HandleFunc("/isFriend", HandleIsFriend)
 	http.HandleFunc("/friends", HandleFriends)
+	http.HandleFunc("/toBeFriends", HandleTobeFriends)
 	http.ListenAndServe(":8000", nil)
 }

@@ -43,6 +43,28 @@ func AddFriend(msg Message) (friend Friend, err error) {
 	return
 }
 
+func TobeFriend(host string, friends []int64) (bool, error) {
+
+	var success = false
+	friend := Friend{}
+	row := dbHandler.QueryRow("SELECT * FROM friends WHERE email = $1", host)
+	err := row.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
+	switch {
+	case err == sql.ErrNoRows:
+		err = errors.New("%s does not exist!")
+	case err != nil:
+		err = errors.New(fmt.Sprintf("interval error :%s", err))
+	}
+	_, err = dbHandler.Exec("UPDATE friends set friends=$1 WHERE email=$2", pq.Array(friends), host)
+	if err != nil {
+		err = errors.New(fmt.Sprintf("interval error :%s", err))
+	} else {
+		success = true
+	}
+	return success, err
+
+}
+
 func GetAll() ([]Friend, error) {
 	list := []Friend{}
 	rows, err := dbHandler.Query("SELECT * FROM friends;")

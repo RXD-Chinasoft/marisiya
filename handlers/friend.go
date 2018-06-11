@@ -15,7 +15,7 @@ type FriendsArray struct {
 
 type RequestForToBeFriends struct {
 	Host string `json:"host"`
-	Slaves []int64 `json:"friends"`
+	Slaves []string `json:"friends"`
 }
 
 type Result struct {

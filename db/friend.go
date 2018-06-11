@@ -43,25 +43,40 @@ func AddFriend(msg Message) (friend Friend, err error) {
 	return
 }
 
-func TobeFriend(host string, friends []int64) (bool, error) {
+func TobeFriend(host string, friends []string) (bool, error) {
 
-	var success = false
 	friend := Friend{}
 	row := dbHandler.QueryRow("SELECT * FROM friends WHERE email = $1", host)
 	err := row.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
 	switch {
 	case err == sql.ErrNoRows:
-		err = errors.New("%s does not exist!")
+		return false, errors.New(fmt.Sprintf("%s does not exist!", host))
 	case err != nil:
-		err = errors.New(fmt.Sprintf("interval error :%s", err))
+		return false, errors.New(fmt.Sprintf("interval error :%s", err))
 	}
-	_, err = dbHandler.Exec("UPDATE friends set friends=$1 WHERE email=$2", pq.Array(friends), host)
+	var all []Friend
+	all, err = GetAll()
 	if err != nil {
-		err = errors.New(fmt.Sprintf("interval error :%s", err))
-	} else {
-		success = true
+		return false, err
 	}
-	return success, err
+	relations := []int64{}
+	for _, v := range friends {
+		var exist = false
+		for _, m := range all {
+			if v == m.Email {
+				exist = true
+				relations = append(relations, m.Id)
+			}
+		}
+		if !exist {
+			return false, errors.New(fmt.Sprintf("%s does not exist!", v))
+		}
+	}
+	_, err = dbHandler.Exec("UPDATE friends set friends=$1 WHERE email=$2", pq.Array(relations), host)
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("interval error :%s", err))
+	}
+	return true, nil
 
 }
 

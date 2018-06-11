@@ -276,9 +276,16 @@
                                 <div id="commonfriends"></div>
                                 <input type="button" onclick="getCommonFriends()" value="Retrieves common friends" />
                                 <hr>
-                                <p>
+                                <!-- <p>
                                     <input id="input" type="text" value="Hello world!" />
-                                    <input type="button" id="send" value="Send" />
+                                    <input type="button" id="send" value="Send" /> -->
+                                <p>subscribe/block</p>
+                                <div id="subBlock">
+                                    <select id="requestor" onchange="selectRequestor(this)"></select>
+                                </div>
+                                <input type="button" onclick="subscribe()" value="subscribe" />
+                                <input type="button" onclick="block()" value="block" />
+                                <hr>
                         </form>
             </td>
             <td valign="top" width="50%">

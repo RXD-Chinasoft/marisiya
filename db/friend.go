@@ -86,7 +86,7 @@ func GetAll() ([]Friend, error) {
 	return list, err
 }
 
-func IsFriend(friends ...int64) (isFriend bool, err error) {
+func IsFriend(friends ...string) (isFriend bool, err error) {
 	if len(friends) < 1 {
 		err = errors.New("more friends required")
 		return
@@ -96,16 +96,18 @@ func IsFriend(friends ...int64) (isFriend bool, err error) {
 		return
 	}
 	log.Println(friends)
-	var rfs []int64 //relation friends
-	rfs, err = GetFriends(friends[0])
+	// var rfs []int64 //relation friends
+	// rfs, err = GetFriends(friends[0])
+	var hostInfo Friend
+	hostInfo, err = GetInfoByEmail(friends[0])
 	if err != nil {
 		return
 	}
-	if len(rfs) == 0 {
+	if len(hostInfo.Friends) == 0 {
 		log.Println("find no friends")
 		return
 	}
-	log.Printf("relation friends %v \n", rfs)
+	log.Printf("relation friends %v \n", hostInfo.Friends)
 	var all []Friend // all friends
 	all, err = GetAll()
 	if err != nil {
@@ -126,8 +128,8 @@ func IsFriend(friends ...int64) (isFriend bool, err error) {
 	// 		return
 	// 	}
 	// }
-	for _, r := range rfs {
-		if isFriend = validRelation(friends[0], r, all);!isFriend {
+	for _, r := range hostInfo.Friends {
+		if isFriend = validRelation(hostInfo.Id, r, all);!isFriend {
 			return
 		}
 	}
@@ -166,8 +168,8 @@ func GetFriends(id int64) (friends []int64, err error) {
 	return
 }
 
-func GetEmailFriends(email string) (friends []int64, err error) {
-	friend := Friend{}
+func GetInfoByEmail(email string) (friend Friend, err error) {
+	friend = Friend{}
 	err = dbHandler.QueryRow("SELECT * FROM friends WHERE email = $1", email).Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
 	switch {
 	case err == sql.ErrNoRows:
@@ -179,21 +181,22 @@ func GetEmailFriends(email string) (friends []int64, err error) {
 		log.Printf("interval error %d", err)
 		return
 	}
-	friends = friend.Friends
+	// friends = friend.Friends
 	return
 }
 
 func GetFriendsName(mail string) (friends []string, err error) {
-	var rfs []int64 //relation friends
-	rfs, err = GetEmailFriends(mail)
+	var hostInfo Friend
+	// var rfs []int64 //relation friends
+	hostInfo, err = GetInfoByEmail(mail)
 	if err != nil {
 		return
 	}
-	if len(rfs) == 0 {
+	if len(hostInfo.Friends) == 0 {
 		log.Println("find no friends")
 		return
 	}
-	log.Printf("relation friends %v :", rfs)
+	log.Printf("relation friends %v :", hostInfo.Friends)
 	var all []Friend // all friends
 	all, err = GetAll()
 	if err != nil {
@@ -202,7 +205,7 @@ func GetFriendsName(mail string) (friends []string, err error) {
 	log.Printf("all friends %s :", all)
 
 	friends = []string{}
-	for _, r := range rfs {
+	for _, r := range hostInfo.Friends {
 		for _, v := range all {
 			log.Printf("friend %s :", v)
 			if r == v.Id {

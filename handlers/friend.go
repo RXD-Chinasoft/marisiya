@@ -10,7 +10,7 @@ import (
 )
 
 type FriendsArray struct {
-	Friends []int64 `json:"friends"`
+	Friends []string `json:"friends"`
 }
 
 type RequestForToBeFriends struct {

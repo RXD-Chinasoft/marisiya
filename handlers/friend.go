@@ -27,10 +27,10 @@ type PostEmail struct {
 	Email string `json:"email"`
 }
 
-type FindFriendsResult struct {
+type CommonFriendsResponse struct {
 	Success bool `json:"success"`
 	Friends []string `json:"friends"`
-	Count int64 `json:"count"`
+	Count int `json:"count"`
 }
 func HandleTobeFriends(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
@@ -108,7 +108,40 @@ func HandleFriends(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandleGetFriends(w http.ResponseWriter, r *http.Request) {
+// func HandleGetFriends(w http.ResponseWriter, r *http.Request) {
+// 	if r.Method == "POST" {
+// 		res, err := ioutil.ReadAll(r.Body)
+// 		r.Body.Close()
+// 		if err != nil {
+// 			log.Printf("err %s \n", res)
+// 			http.Error(w, http.StatusText(http.StatusBadRequest), 400)
+// 		} else {
+// 			log.Printf("%s \n", string(res))
+// 			param := PostEmail{}
+// 			// json.Unmarshal(res, &param)
+// 			err = json.NewDecoder(strings.NewReader(string(res))).Decode(&param)
+// 			log.Printf("%+v \n", param)
+
+// 			friends, err := db.GetFriendsName(param.Email)
+// 			if err != nil {
+// 				http.Error(w, err.Error(), 500)
+// 			} else {
+// 				result := FindFriendsResult{}
+// 				result.Success = true
+// 				result.Friends = friends
+// 				if err1 := json.NewEncoder(w).Encode(&result); err1 != nil {
+// 					http.Error(w, http.StatusText(500), 500)
+// 				}
+// 				log.Printf("friends all name : %v \n", friends)
+// 			}
+// 		}
+		
+// 	} else {
+// 		http.Error(w, http.StatusText(http.StatusBadRequest), 400)
+// 	}
+// }
+
+func RetrieveCommonFriends(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		res, err := ioutil.ReadAll(r.Body)
 		r.Body.Close()
@@ -117,18 +150,20 @@ func HandleGetFriends(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusBadRequest), 400)
 		} else {
 			log.Printf("%s \n", string(res))
-			param := PostEmail{}
-			// json.Unmarshal(res, &param)
+			param := FriendsArray{}
 			err = json.NewDecoder(strings.NewReader(string(res))).Decode(&param)
 			log.Printf("%+v \n", param)
-
-			friends, err := db.GetFriendsName(param.Email)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusBadRequest), 400)
+			}
+			friends, err := db.FindCommonFriends(param.Friends ...)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 			} else {
-				result := FindFriendsResult{}
+				result := CommonFriendsResponse{}
 				result.Success = true
 				result.Friends = friends
+				result.Count = len(friends)
 				if err1 := json.NewEncoder(w).Encode(&result); err1 != nil {
 					http.Error(w, http.StatusText(500), 500)
 				}

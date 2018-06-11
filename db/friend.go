@@ -105,28 +105,47 @@ func IsFriend(friends ...int64) (isFriend bool, err error) {
 		log.Println("find no friends")
 		return
 	}
-	log.Printf("relation friends %v :", rfs)
+	log.Printf("relation friends %v \n", rfs)
 	var all []Friend // all friends
 	all, err = GetAll()
 	if err != nil {
 		return
 	}
-	log.Printf("all friends %s :", all)
+	log.Printf("all friends %s \n", all)
 
+	// for _, r := range rfs {
+	// 	bingo := false
+	// 	for _, v := range all {
+	// 		log.Printf("friend %s \n", v)
+	// 		if r == v.Id {
+	// 			bingo = true
+	// 		}
+	// 	}
+	// 	if !bingo {
+	// 		isFriend = false;
+	// 		return
+	// 	}
+	// }
 	for _, r := range rfs {
-		bingo := false
-		for _, v := range all {
-			log.Printf("friend %s :", v)
-			if r == v.Id {
-				bingo = true
-			}
-		}
-		if !bingo {
-			isFriend = false;
+		if isFriend = validRelation(friends[0], r, all);!isFriend {
 			return
 		}
 	}
-	isFriend = true;
+	return
+}
+
+func validRelation(host int64, hostFriend int64, allFriends []Friend) (pass bool) {
+	for _, v := range allFriends {
+		if hostFriend == v.Id { // find friend
+			log.Printf("my friend detail %s \n", v)
+			for _, m := range v.Friends{
+				if m == host {
+					pass = true
+					return
+				}
+			}
+		}
+	}
 	return
 }
 

@@ -30,8 +30,19 @@ func TobeFriend(friends []string) (bool, error) {
 				cur = i
 			}
 		}
-		some[cur].Friends = make([]int64, len(tmp))
-		copy(some[cur].Friends, tmp)
+		// some[cur].Friends = make([]int64, len(tmp))
+		for _, t := range tmp {
+			var has = false
+			for _, m := range some[cur].Friends {
+				if m == t {
+					has = true
+				}
+			}
+			if !has {
+				some[cur].Friends = append(some[cur].Friends, t)
+			}
+		}
+		// copy(some[cur].Friends, tmp)
 		log.Printf("some friends append %v , %v", tmp, some[cur])
 	}
 	// updates
@@ -112,21 +123,11 @@ func IsFriend(friends ...string) (isFriend bool, err error) {
 	}
 	log.Printf("all friends %s \n", all)
 
-	// for _, r := range rfs {
-	// 	bingo := false
-	// 	for _, v := range all {
-	// 		log.Printf("friend %s \n", v)
-	// 		if r == v.Id {
-	// 			bingo = true
-	// 		}
-	// 	}
-	// 	if !bingo {
-	// 		isFriend = false;
-	// 		return
-	// 	}
-	// }
-	for _, r := range hostInfo.Friends {
-		if isFriend = validRelation(hostInfo.Id, r, all);!isFriend {
+	if len(hostInfo.Friends) < len(friends) - 1 {
+		return 
+	}
+	for _, myFriend := range hostInfo.Friends {
+		if isFriend = validRelation(myFriend, all, friends[1:]...);!isFriend {
 			return
 		}
 	}
@@ -264,12 +265,12 @@ func GetAll() ([]Friend, error) {
 	return list, err
 }
 
-func validRelation(host int64, hostFriend int64, allFriends []Friend) (pass bool) {
+func validRelation(hostFriend int64, allFriends []Friend, friends ...string) (pass bool) {
 	for _, v := range allFriends {
 		if hostFriend == v.Id { // find friend
-			log.Printf("my friend detail %s \n", v)
-			for _, m := range v.Friends{
-				if m == host {
+			log.Printf("my friend detail %s, %v \n", v, friends)
+			for _, email := range friends{
+				if email == v.Email {
 					pass = true
 					return
 				}

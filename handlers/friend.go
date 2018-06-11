@@ -10,10 +10,15 @@ import (
 )
 
 type FriendsArray struct {
-	Friends []string `json:"friends"`
+	Friends []int64 `json:"friends"`
 }
 
-type IsFriendResult struct {
+type RequestForToBeFriends struct {
+	Host string `json:"host"`
+	Slaves []int64 `json:"friends"`
+}
+
+type Result struct {
 	Success bool `json:"success"`
 	Reseason string `json:"reseason"`
 }
@@ -26,6 +31,32 @@ type FindFriendsResult struct {
 	Success bool `json:"success"`
 	Friends []string `json:"friends"`
 	Count int64 `json:"count"`
+}
+func HandleTobeFriends(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		res, err := ioutil.ReadAll(r.Body)
+		r.Body.Close()
+		if err != nil {
+			log.Printf("err %s \n", res)
+		} else {
+			param := RequestForToBeFriends{}
+			err = json.NewDecoder(strings.NewReader(string(res))).Decode(&param)
+			log.Printf("%+v \n", param)
+			_, err = db.TobeFriend(param.Host, param.Slaves)
+			result := Result{}
+			if err != nil {
+				result.Success = false
+				result.Reseason = err.Error()
+			} else {
+				result.Success = true
+				result.Reseason = ""
+			}
+			if err1 := json.NewEncoder(w).Encode(&result); err1 != nil {
+				http.Error(w, http.StatusText(500), 500)
+			}
+		}
+
+	}
 }
 
 func HandleIsFriend(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +76,7 @@ func HandleIsFriend(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				http.Error(w, http.StatusText(500), 500)
 			} else {
-				result := IsFriendResult{}
+				result := Result{}
 				result.Success = isFriend
 				if isFriend {
 					result.Reseason = ""

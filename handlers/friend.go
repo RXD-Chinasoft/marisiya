@@ -175,3 +175,11 @@ func RetrieveCommonFriends(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), 400)
 	}
 }
+
+func HandleSubscribe(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, http.StatusText(200), 200)
+}
+
+func HandleBlock(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, http.StatusText(200), 200)
+}

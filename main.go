@@ -18,5 +18,7 @@ func main() {
 	// http.HandleFunc("/getFriends", HandleGetFriends)
 	http.HandleFunc("/toBeFriends", HandleTobeFriends)
 	http.HandleFunc("/retreiveCommonFriends", RetrieveCommonFriends)
+	http.HandleFunc("/subscribe", HandleSubscribe)
+	http.HandleFunc("/block", HandleBlock)
 	http.ListenAndServe(":8000", nil)
 }

@@ -14,7 +14,7 @@ type FriendsArray struct {
 }
 
 type RequestForToBeFriends struct {
-	Host string `json:"host"`
+	// Host string `json:"host"`
 	Slaves []string `json:"friends"`
 }
 
@@ -42,7 +42,7 @@ func HandleTobeFriends(w http.ResponseWriter, r *http.Request) {
 			param := RequestForToBeFriends{}
 			err = json.NewDecoder(strings.NewReader(string(res))).Decode(&param)
 			log.Printf("%+v \n", param)
-			_, err = db.TobeFriend(param.Host, param.Slaves)
+			_, err = db.TobeFriend(param.Slaves)
 			result := Result{}
 			if err != nil {
 				result.Success = false

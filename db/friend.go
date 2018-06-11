@@ -57,38 +57,6 @@ func TobeFriend(friends []string) (bool, error) {
 	if err = tx.Commit();err != nil {
 		return false, errors.New(fmt.Sprintf("commit update relation error %s", err))
 	}
-
-	// friend := Friend{}
-	// row := dbHandler.QueryRow("SELECT * FROM friends WHERE email = $1", host)
-	// err = row.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
-	// switch {
-	// case err == sql.ErrNoRows:
-	// 	return false, errors.New(fmt.Sprintf("%s does not exist!", host))
-	// case err != nil:
-	// 	return false, errors.New(fmt.Sprintf("interval error :%s", err))
-	// }
-	// var all []Friend
-	// all, err = GetAll()
-	// if err != nil {
-	// 	return false, err
-	// }
-	// relations := []int64{}
-	// for _, v := range friends {
-	// 	var exist = false
-	// 	for _, m := range all {
-	// 		if v == m.Email {
-	// 			exist = true
-	// 			relations = append(relations, m.Id)
-	// 		}
-	// 	}
-	// 	if !exist {
-	// 		return false, errors.New(fmt.Sprintf("%s does not exist!", v))
-	// 	}
-	// }
-	// _, err = dbHandler.Exec("UPDATE friends set friends=$1 WHERE email=$2", pq.Array(relations), host)
-	// if err != nil {
-	// 	return false, errors.New(fmt.Sprintf("interval error :%s", err))
-	// }
 	return true, nil
 
 }
@@ -170,7 +138,7 @@ func FindCommonFriends(friends ...string) (common []string, err error) {
 func getFriendById(id int64) (friend Friend, err error) {
 	friend = Friend{}
 	row := dbHandler.QueryRow("SELECT * FROM friends WHERE id = $1", id)
-	err = row.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
+	err = row.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends), pq.Array(&friend.SubscribMgr))
 	switch {
 	case err == sql.ErrNoRows:
 		err = errors.New(fmt.Sprintf("not found %d", id))
@@ -190,7 +158,7 @@ func AddFriend(msg Message) (friend Friend, err error) {
 	}
 	friend = Friend{}
 	row := dbHandler.QueryRow("SELECT * FROM friends WHERE email = $1", v)
-	err = row.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
+	err = row.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends), pq.Array(&friend.SubscribMgr))
 	switch {
 	case err == sql.ErrNoRows:
 		log.Printf("not found %s", msg.Data)
@@ -233,7 +201,7 @@ func GetSome(emails ...string) ([]Friend, error) {
 	defer rows.Close()
 	for rows.Next() {
 		friend := Friend{}
-		err := rows.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
+		err := rows.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends), pq.Array(&friend.SubscribMgr))
 		if err != nil {
 			log.Printf("scan friend error %s :", err)
 			break
@@ -254,7 +222,7 @@ func GetAll() ([]Friend, error) {
 	defer rows.Close()
 	for rows.Next() {
 		friend := Friend{}
-		err := rows.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
+		err := rows.Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends), pq.Array(&friend.SubscribMgr))
 		if err != nil {
 			log.Printf("scan friend error %s :", err)
 			break
@@ -282,7 +250,7 @@ func validRelation(hostFriend int64, allFriends []Friend, friends ...string) (pa
 
 func GetFriends(id int64) (friends []int64, err error) {
 	friend := Friend{}
-	err = dbHandler.QueryRow("SELECT * FROM friends WHERE id = $1", id).Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
+	err = dbHandler.QueryRow("SELECT * FROM friends WHERE id = $1", id).Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends), pq.Array(&friend.SubscribMgr))
 	switch {
 	case err == sql.ErrNoRows:
 		log.Printf("%d do not exist", id)
@@ -299,7 +267,7 @@ func GetFriends(id int64) (friends []int64, err error) {
 
 func GetInfoByEmail(email string) (friend Friend, err error) {
 	friend = Friend{}
-	err = dbHandler.QueryRow("SELECT * FROM friends WHERE email = $1", email).Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends))
+	err = dbHandler.QueryRow("SELECT * FROM friends WHERE email = $1", email).Scan(&friend.Id, &friend.Email, pq.Array(&friend.Friends), pq.Array(&friend.SubscribMgr))
 	switch {
 	case err == sql.ErrNoRows:
 		log.Printf("%s do not exist", email)

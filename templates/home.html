@@ -55,8 +55,8 @@
                 const element = inputs[index];
                 element.checked = false;
                 element.parentElement.style.display = "block";
-                if (opt.value == element.value) {
-                    console.log(opt.value, element.value)
+                if (opt.innerText == element.value) {
+                    console.log(opt.innerText, element.value)
                     element.parentElement.style.display = "none";
                 }
             }
@@ -68,21 +68,38 @@
                 return
             }
             var opt = obj.options[obj.selectedIndex];
-            var inputs = friendsslaver.getElementsByTagName("input");
+            var inputs = document.getElementById("friendsslaver").getElementsByTagName("input");
             var friends = [];
+            friends.push(opt.text);
             for (let index = 0; index < inputs.length; index++) {
                 const element = inputs[index];
                 if (element.checked) {
-                    friends.push(parseInt(element.value))
+                    friends.push(element.value)
                 }
             }
-            if (friends.length == 0) {
+            if (friends.length <= 1) {
                 alert("no friend be selected")
                 return;
             }
-           
+
             console.log(opt.text, friends)
-            post("/toBeFriends", { host: opt.text, friends });
+            post("/toBeFriends", { friends });
+        }
+
+        function getCommonFriends() {
+            var fsDom = document.getElementById("commonfriends");
+            var inputs = fsDom.getElementsByTagName("input");
+            var l = inputs.length;
+            var params = []
+            for (var i = 0; i < l; i++) {
+                if (inputs[i].checked) {
+                    params.push(inputs[i].value)
+                }
+            }
+            console.log(params)
+            if (params.length > 1) {
+                post("/retreiveCommonFriends", { friends: params });
+            }
         }
 
         window.addEventListener("load", function (evt) {
@@ -114,6 +131,8 @@
                                     inputs[0].remove();
                                 //clear
                                 var friendsslaver = document.getElementById("friendsslaver");
+                                var commonDom = document.getElementById("commonfriends");
+
                                 var host = document.getElementById("host");
                                 host.options.length = 0;
                                 var option = document.createElement("option");
@@ -129,13 +148,17 @@
                                     fsDom.appendChild(div);
 
                                     var div1 = document.createElement("div");
-                                    div1.innerHTML = `<input type="checkbox" name="2" value="` + friend.id + `"> ` + friend.email + ``;
+                                    div1.innerHTML = `<input type="checkbox" name="2" value="` + friend.email + `"> ` + friend.email + ``;
                                     friendsslaver.appendChild(div1);
 
                                     var option = document.createElement("option");
                                     option.value = friend.id;
                                     option.innerText = friend.email;
                                     host.appendChild(option);
+
+                                    var div2 = document.createElement("div");
+                                    div2.innerHTML = `<input type="checkbox" name="3" value="` + friend.email + `"> ` + friend.email + ``;
+                                    commonDom.appendChild(div2);
                                 }
                             }
                             else {
@@ -231,24 +254,31 @@
                     <p>
                         <form>
                             <label>WebSocket:</label>
-                            <input type="button" id="open" value="Open">
-                            <input type="button" id="close" value="Close">
+                            <input type="button" id="open" value="Open" />
+                            <input type="button" id="close" value="Close" />
                             <p>
-                                <input id="mail" type="text" value="example@example.com">
-                                <input type="button" id="add" value="Add friend">
+                                <input id="mail" type="text" value="example@example.com" />
+                                <input type="button" id="add" value="Add friend" />
                                 <div id="friendsslaver">
                                     <select id="host" onchange="selectHost(this)"></select>
                                 </div>
-                                <input type="button" id="toBefriends" onclick="toBeFriends()" value="To be friends">
+                                <input type="button" onclick="toBeFriends()" value="To be friends" />
                                 <hr>
                                 <p>relationship</p>
                                 <div id="friends"></div>
                                 <input type="button" id="isFriend" value="Are they friends?">
                                 <hr>
+                                <!-- <p>myFriends</p>
+                                <div id="myFriends"></div>
+                                <input type="button" id="getMyFriends" value="Retrieves friends list">
+                                <hr> -->
                                 <p>common friends</p>
+                                <div id="commonfriends"></div>
+                                <input type="button" onclick="getCommonFriends()" value="Retrieves common friends" />
+                                <hr>
                                 <p>
-                                    <input id="input" type="text" value="Hello world!">
-                                    <input type="button" id="send" value="Send">
+                                    <input id="input" type="text" value="Hello world!" />
+                                    <input type="button" id="send" value="Send" />
                         </form>
             </td>
             <td valign="top" width="50%">

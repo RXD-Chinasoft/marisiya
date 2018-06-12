@@ -131,17 +131,29 @@ func HandleHomeByChan(wsChan *WsChan) func (w http.ResponseWriter, r *http.Reque
 						if publish, ok := message.Data.(map[string]interface{});!ok {
 							wsChan.C.WriteJSON("wrong data")
 						} else {
-							friend, err := db.GetInfoByEmail(publish["email"].(string))
+							eml := publish["email"].(string)
+							friend, err := db.GetInfoByEmail(eml)
 							if err != nil {
 								wsChan.C.WriteJSON(err.Error())
 							} else {
 								log.Println("CMD_PUBLISH: ", friend)
-								pbs := Publish{Emails:[]string{}}
+								pbs := Publish{Emails:[]string{}, Notes:[]string{}}
 								for _, v := range friend.SubscribMgr {
 									if i, err := strconv.Atoi(strings.Split(v, ",")[1]);err != nil {
 										wsChan.C.WriteJSON(err.Error())
 									} else {
-										if i == 1 {
+										if i == 0 {
+											if isFriend, err := db.IsFriend(eml, strings.Split(v, ",")[0]);err !=nil{
+												wsChan.C.WriteJSON(err.Error())
+											} else {
+												if !isFriend {
+													pbs.Emails = append(pbs.Emails, strings.Split(v, ",")[0])
+												} else {
+													pbs.Notes = append(pbs.Notes, fmt.Sprintf("%s and %s are friends, so %s no longer received notifications from %s", eml, strings.Split(v, ",")[0], eml, strings.Split(v, ",")[0]))
+												}
+											}
+											
+										} else {
 											pbs.Emails = append(pbs.Emails, strings.Split(v, ",")[0])
 										}
 									}

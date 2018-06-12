@@ -25,5 +25,5 @@ type Message struct {
 type Publish struct {
 	Emails []string `json:"emails"`
 	Message string `json:"message"`
-
+	Notes []string `json:"notes"`
 }

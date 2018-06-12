@@ -107,12 +107,25 @@ func HandleHomeByChan(wsChan *WsChan) func (w http.ResponseWriter, r *http.Reque
 		go func() {
 			for {
 				message := <- wsChan.GroupChan[KIND_HOME]
-				_, err = db.AddFriend(message) //test
-				if err != nil {
-					log.Println("Add friend fail: ", err)
-				} else {
-					wsChan.C.WriteJSON("add friend successfully")
+				switch message.Cmd{
+				case CMD_NEW_FRIEND:
+					_, err = db.AddFriend(message) //test
+					if err != nil {
+						log.Println("Add friend fail: ", err)
+					} else {
+						wsChan.C.WriteJSON("add friend successfully")
+					}
+				case CMD_PUBLISH:
+					if message.Data == nil {
+						wsChan.C.WriteJSON("wrong data")
+					} else {
+						log.Println("CMD_PUBLISH: ", message.Data)
+					}
+					
+				default:
+					wsChan.C.WriteJSON("unkown cmd")
 				}
+				
 			}
 		}()
 		

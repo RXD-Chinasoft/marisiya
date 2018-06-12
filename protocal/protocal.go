@@ -6,7 +6,9 @@ import (
 
 const (
 	KIND_HOME = "home"
-	KIND_SUBSCRIBE = "subscribe"
+	KIND_OTHERS = "others"
+	CMD_NEW_FRIEND = "new_friend"
+	CMD_PUBLISH = "publish"
 )
 
 type WsChan struct {

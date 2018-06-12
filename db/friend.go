@@ -96,11 +96,12 @@ func IsFriend(friends ...string) (isFriend bool, err error) {
 	if len(hostInfo.Friends) < len(friends) - 1 {
 		return 
 	}
-	for _, myFriend := range hostInfo.Friends {
-		if isFriend = validRelation(myFriend, all, friends[1:]...);!isFriend {
-			return
-		}
-	}
+	// for _, myFriend := range hostInfo.Friends {
+	// 	if isFriend = validRelation(myFriend, all, friends[1:]...);!isFriend {
+	// 		return
+	// 	}
+	// }
+	isFriend = validRelation(hostInfo.Friends, all, friends[1:]...)
 	return
 }
 
@@ -289,18 +290,41 @@ func GetAll() ([]Friend, error) {
 	return list, err
 }
 
-func validRelation(hostFriend int64, allFriends []Friend, friends ...string) (pass bool) {
-	for _, v := range allFriends {
-		if hostFriend == v.Id { // find friend
-			log.Printf("my friend detail %s, %v \n", v, friends)
-			for _, email := range friends{
-				if email == v.Email {
-					pass = true
-					return
-				}
+func validRelation(hostFriends []int64, allFriends []Friend, friends ...string) (pass bool) {
+	// for _, v := range allFriends {
+	// 	if hostFriend == v.Id { // find friend
+	// 		log.Printf("my friend detail %s, %v \n", v, friends)
+	// 		for _, email := range friends{
+	// 			if email == v.Email {
+	// 				pass = true
+	// 				return
+	// 			}
+	// 		}
+	// 	}
+	// }
+	hfs := []Friend{}
+	for _, hs := range hostFriends {
+		for _, v := range allFriends{
+			if hs == v.Id {
+				log.Printf("my friend detail %s, %v \n", v, friends)
+				hfs = append(hfs, v)
+				break
 			}
 		}
 	}
+	for _, email := range friends {
+		inFriends := false
+		for _, v := range hfs{
+			if email == v.Email { // find friend
+				inFriends = true
+				break
+			}
+		}
+		if !inFriends {
+			return
+		}
+	}
+	pass = true
 	return
 }
 

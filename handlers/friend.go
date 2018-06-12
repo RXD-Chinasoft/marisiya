@@ -197,7 +197,20 @@ func HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				http.Error(w, http.StatusText(http.StatusBadRequest), 400)
 			}
-			db.Subscribe(param.Requestor, param.Target)
+			success, err1 := db.Subscribe(param.Requestor, param.Target)
+			result := Result{}
+			if err1 != nil {
+				result.Reseason = err1.Error()
+				result.Success = false
+				http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
+			} else {
+				result.Reseason = ""
+				result.Success = success
+				if err = json.NewEncoder(w).Encode(&result);err != nil {
+					http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
+				}
+			}
+			
 		}
 		
 	} else {
@@ -221,7 +234,19 @@ func HandleBlock(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				http.Error(w, http.StatusText(http.StatusBadRequest), 400)
 			}
-			db.Block(param.Requestor, param.Target)
+			success, err1 := db.Block(param.Requestor, param.Target)
+			result := Result{}
+			if err1 != nil {
+				result.Reseason = err1.Error()
+				result.Success = false
+				http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
+			} else {
+				result.Reseason = ""
+				result.Success = success
+				if err = json.NewEncoder(w).Encode(&result);err != nil {
+					http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
+				}
+			}
 		}
 		
 	} else {

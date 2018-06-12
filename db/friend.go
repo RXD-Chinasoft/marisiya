@@ -133,6 +133,18 @@ func FindCommonFriends(friends ...string) (common []string, err error) {
 	return
 }
 
+// api4
+func Subscribe(requstor string, target string) (success bool, err error) {
+
+	return
+}
+
+// api5
+func Block(requstor string, target string) (success bool, err error) {
+
+	return
+}
+
 // helpers
 
 func getFriendById(id int64) (friend Friend, err error) {

@@ -18,6 +18,11 @@ type RequestForToBeFriends struct {
 	Slaves []string `json:"friends"`
 }
 
+type RequestForSubscribe struct {
+	Requestor string `json:"requestor"`
+	Target string `json:"target"`
+}
+
 type Result struct {
 	Success bool `json:"success"`
 	Reseason string `json:"reseason"`
@@ -177,9 +182,49 @@ func RetrieveCommonFriends(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleSubscribe(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, http.StatusText(200), 200)
+	// http.Error(w, http.StatusText(200), 200)
+	if r.Method == "POST" {
+		res, err := ioutil.ReadAll(r.Body)
+		r.Body.Close()
+		if err != nil {
+			log.Printf("err %s \n", res)
+			http.Error(w, http.StatusText(http.StatusBadRequest), 400)
+		} else {
+			log.Printf("%s \n", string(res))
+			param := RequestForSubscribe{}
+			err = json.NewDecoder(strings.NewReader(string(res))).Decode(&param)
+			log.Printf("%+v \n", param)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusBadRequest), 400)
+			}
+			db.Subscribe(param.Requestor, param.Target)
+		}
+		
+	} else {
+		http.Error(w, http.StatusText(http.StatusBadRequest), 400)
+	}
 }
 
 func HandleBlock(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, http.StatusText(200), 200)
+	// http.Error(w, http.StatusText(200), 200)
+	if r.Method == "POST" {
+		res, err := ioutil.ReadAll(r.Body)
+		r.Body.Close()
+		if err != nil {
+			log.Printf("err %s \n", res)
+			http.Error(w, http.StatusText(http.StatusBadRequest), 400)
+		} else {
+			log.Printf("%s \n", string(res))
+			param := RequestForSubscribe{}
+			err = json.NewDecoder(strings.NewReader(string(res))).Decode(&param)
+			log.Printf("%+v \n", param)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusBadRequest), 400)
+			}
+			db.Block(param.Requestor, param.Target)
+		}
+		
+	} else {
+		http.Error(w, http.StatusText(http.StatusBadRequest), 400)
+	}
 }

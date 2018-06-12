@@ -97,7 +97,7 @@ func HandleHomeByTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandleHomeByChan(mchan <-chan Message) func (w http.ResponseWriter, r *http.Request) {
+func HandleHomeByChan(wsChan *WsChan) func (w http.ResponseWriter, r *http.Request) {
 	return func (w http.ResponseWriter, r *http.Request) {
 		homeTemplate := template.Must(template.New("home.html").ParseFiles("templates/home.html"))
 		err := homeTemplate.Execute(w, nil)
@@ -106,10 +106,12 @@ func HandleHomeByChan(mchan <-chan Message) func (w http.ResponseWriter, r *http
 		}
 		go func() {
 			for {
-				message := <- mchan
+				message := <- wsChan.GroupChan[KIND_HOME]
 				_, err = db.AddFriend(message) //test
 				if err != nil {
 					log.Println("Add friend fail: ", err)
+				} else {
+					wsChan.C.WriteJSON("add friend successfully")
 				}
 			}
 		}()

@@ -36,7 +36,7 @@ func HandleWs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandleWsByChan(mchan chan<- Message) func (w http.ResponseWriter, r *http.Request) {
+func HandleWsByChan(wsChan *WsChan) func (w http.ResponseWriter, r *http.Request) {
 	return func (w http.ResponseWriter, r *http.Request) {
 		c, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -44,6 +44,7 @@ func HandleWsByChan(mchan chan<- Message) func (w http.ResponseWriter, r *http.R
 			return
 		}
 		defer c.Close()
+		wsChan.C = c
 		for {
 			message := &Message {}
 			err := c.ReadJSON(message)
@@ -53,12 +54,17 @@ func HandleWsByChan(mchan chan<- Message) func (w http.ResponseWriter, r *http.R
 			}
 			log.Printf("recv: %s", message)
 			// err = c.WriteJSON(Message{Type:"welcome", Data:"welcome to websocket"})
-			switch message.Cmd {
-			case "new":
-				log.Printf("recv: %s", "new")
+			// switch message.Type {
+			// case "new":
+			// 	log.Printf("recv: %s", "new")
+			// 	mchan <- *message
+			// default:
+			// 	err = c.WriteJSON(message)
+			// }
+			if mchan := wsChan.GroupChan[message.Type];mchan != nil {
 				mchan <- *message
-			default:
-				err = c.WriteJSON(message)
+			} else {
+				err = c.WriteJSON("bad request")
 			}
 				
 			// err = c.WriteJSON(message)

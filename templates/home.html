@@ -126,7 +126,7 @@
             }
             var opt = obj.options[obj.selectedIndex];
             var inputs = document.getElementById("subBlock").getElementsByTagName("input");
-            
+
             var params = {
                 requestor: opt.text,
                 target: ""
@@ -169,14 +169,26 @@
                                 var friends = JSON.parse(xhr.responseText)
                                 var fsDom = document.getElementById("friends");
                                 //clear
-                                var inputs = fsDom.getElementsByTagName("input");
-                                var l = inputs.length;
+                                var divs = fsDom.getElementsByTagName("div");
+                                var l = divs.length;
                                 for (var i = 0; i < l; i++)
-                                    inputs[0].remove();
+                                    divs[0].remove();
                                 //clear
                                 var friendsslaver = document.getElementById("friendsslaver");
+                                var divs = friendsslaver.getElementsByTagName("div");
+                                var l = divs.length;
+                                for (var i = 0; i < l; i++)
+                                    divs[0].remove();
                                 var commonDom = document.getElementById("commonfriends");
+                                var divs = commonDom.getElementsByTagName("div");
+                                var l = divs.length;
+                                for (var i = 0; i < l; i++)
+                                    divs[0].remove();
                                 var subBlock = document.getElementById("subBlock");
+                                var divs = subBlock.getElementsByTagName("div");
+                                var l = divs.length;
+                                for (var i = 0; i < l; i++)
+                                    divs[0].remove();
 
                                 var host = document.getElementById("host");
                                 host.options.length = 0;
@@ -257,15 +269,15 @@
                 }
                 return false;
             };
-            // document.getElementById("send").onclick = function (evt) {
-            //     if (!ws) {
-            //         return false;
-            //     }
-            //     var message = JSON.stringify({ cmd: "other", type: "123", data: input.value })
-            //     ws.send(message);
-            //     print("SEND: " + message);
-            //     return false;
-            // };
+            document.getElementById("send").onclick = function (evt) {
+                if (!ws) {
+                    return false;
+                }
+                var message = JSON.stringify({ cmd: "other", type: "123", data: input.value })
+                ws.send(message);
+                // print("SEND: " + message);
+                return false;
+            };
             document.getElementById("close").onclick = function (evt) {
                 if (!ws) {
                     return false;
@@ -279,9 +291,9 @@
                 if (!ws) {
                     return false;
                 }
-                var message = JSON.stringify({ cmd: "new", type: "new", data: email.value })
+                var message = JSON.stringify({ cmd: "new", type: "home", data: email.value })
                 ws.send(message);
-                print("SEND: " + message);
+                // print("SEND: " + message);
                 return false;
             };
             document.getElementById("isFriend").onclick = function (evt) {
@@ -310,43 +322,44 @@
         <tr>
             <td valign="top" width="50%">
                 <p>Click "Open" to create a connection to the server, "Send" to send a message to the server and "Close" to
-                    close the connection. You can change the message and send multiple times.
+                    close the connection. You can publish topic and send multiple times.
                     <p>
                         <form>
                             <label>WebSocket:</label>
-                            <input type="button" id="open" value="Open" style="background: green;color: white;padding: 5px 10px;"/>
+                            <input type="button" id="open" value="Open" style="background: green;color: white;padding: 5px 10px;" />
                             <input type="button" id="close" value="Close" style="background: red;color: white;padding: 5px 10px;" />
                             <p>
-                            <input id="mail" type="text" value="example@example.com" />
-                            <input type="button" id="add" value="Add friend" />
-                            <div id="friendsslaver">
-                                <select id="host" onchange="selectHost(this)"></select>
-                            </div>
-                            <input type="button" onclick="toBeFriends()" value="To be friends" />
-                            <hr>
-                            <p>relationship</p>
-                            <div id="friends"></div>
-                            <input type="button" id="isFriend" value="Are they friends?">
-                            <hr>
-                            <!-- <p>myFriends</p>
+                                <input id="mail" type="text" value="example@example.com" />
+                                <input type="button" id="add" value="Add friend" />
+                                <div id="friendsslaver">
+                                    <select id="host" onchange="selectHost(this)"></select>
+                                </div>
+                                <input type="button" onclick="toBeFriends()" value="To be friends" />
+                                <hr>
+                                <p>relationship</p>
+                                <div id="friends"></div>
+                                <input type="button" id="isFriend" value="Are they friends?">
+                                <hr>
+                                <!-- <p>myFriends</p>
                             <div id="myFriends"></div>
                             <input type="button" id="getMyFriends" value="Retrieves friends list">
                             <hr> -->
-                            <p>common friends</p>
-                            <div id="commonfriends"></div>
-                            <input type="button" onclick="getCommonFriends()" value="Retrieves common friends" />
-                            <hr>
-                            <!-- <p>
-                                <input id="input" type="text" value="Hello world!" />
-                                <input type="button" id="send" value="Send" /> -->
-                            <p>subscribe/block</p>
-                            <div id="subBlock">
-                                <select id="requestor" onchange="selectRequestor(this)"></select>
-                            </div>
-                            <input type="button" onclick="subBlock('/subscribe')" value="subscribe" />
-                            <input type="button" onclick="subBlock('/block')" value="block" />
-                            <hr>
-                    </form>
+                                <p>common friends</p>
+                                <div id="commonfriends"></div>
+                                <input type="button" onclick="getCommonFriends()" value="Retrieves common friends" />
+                                <hr>
+
+                                <p>subscribe/block</p>
+                                <div id="subBlock">
+                                    <select id="requestor" onchange="selectRequestor(this)"></select>
+                                </div>
+                                <input type="button" onclick="subBlock('/subscribe')" value="subscribe" />
+                                <input type="button" onclick="subBlock('/block')" value="block" />
+                                <p>
+                                    <input id="input" type="text" value="topic one!" />
+                                    <input type="button" id="send" value="Publish topic" />
+                                    <hr>
+                        </form>
             </td>
             <td valign="top" width="50%">
                 <div id="output"></div>

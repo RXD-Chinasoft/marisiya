@@ -1,6 +1,8 @@
 package db
 
 import (
+	"strconv"
+	"strings"
 	// "context"
 	"errors"  
 	"database/sql"
@@ -135,13 +137,55 @@ func FindCommonFriends(friends ...string) (common []string, err error) {
 
 // api4
 func Subscribe(requstor string, target string) (success bool, err error) {
-
+	var hostInfo Friend
+	hostInfo, err = GetInfoByEmail(target)
+	if err != nil {
+		return
+	}
+	var has = false
+	for index, v := range hostInfo.SubscribMgr {
+		if strings.Split(v, ",")[0] == requstor {
+			hostInfo.SubscribMgr[index] = requstor +  "," + strconv.Itoa(1)
+			has = true
+			break
+		}
+	}
+	if !has {
+		hostInfo.SubscribMgr = append(hostInfo.SubscribMgr, requstor + "," + strconv.Itoa(1))
+	}
+	_, err = dbHandler.Exec("UPDATE friends set subscribMgr=$1 WHERE email=$2", pq.Array(hostInfo.SubscribMgr), target)
+	if err != nil {
+		err = errors.New("subscribe error")
+		return
+	}
+	success = true
 	return
 }
 
 // api5
 func Block(requstor string, target string) (success bool, err error) {
-
+	var hostInfo Friend
+	hostInfo, err = GetInfoByEmail(target)
+	if err != nil {
+		return
+	}
+	var has = false
+	for index, v := range hostInfo.SubscribMgr {
+		if strings.Split(v, ",")[0] == requstor {
+			hostInfo.SubscribMgr[index] = requstor +  "," + strconv.Itoa(0)
+			has = true
+			break
+		}
+	}
+	if !has {
+		hostInfo.SubscribMgr = append(hostInfo.SubscribMgr, requstor + "," + strconv.Itoa(0))
+	}
+	_, err = dbHandler.Exec("UPDATE friends set subscribMgr=$1 WHERE email=$2", pq.Array(hostInfo.SubscribMgr), target)
+	if err != nil {
+		err = errors.New("block error")
+		return
+	}
+	success = true
 	return
 }
 

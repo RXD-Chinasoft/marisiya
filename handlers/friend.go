@@ -202,13 +202,12 @@ func HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 			if err1 != nil {
 				result.Reseason = err1.Error()
 				result.Success = false
-				http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
 			} else {
 				result.Reseason = ""
 				result.Success = success
-				if err = json.NewEncoder(w).Encode(&result);err != nil {
-					http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
-				}
+			}
+			if err = json.NewEncoder(w).Encode(&result);err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
 			}
 			
 		}
@@ -219,7 +218,6 @@ func HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleBlock(w http.ResponseWriter, r *http.Request) {
-	// http.Error(w, http.StatusText(200), 200)
 	if r.Method == "POST" {
 		res, err := ioutil.ReadAll(r.Body)
 		r.Body.Close()
@@ -239,13 +237,12 @@ func HandleBlock(w http.ResponseWriter, r *http.Request) {
 			if err1 != nil {
 				result.Reseason = err1.Error()
 				result.Success = false
-				http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
 			} else {
 				result.Reseason = ""
 				result.Success = success
-				if err = json.NewEncoder(w).Encode(&result);err != nil {
-					http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
-				}
+			}
+			if err = json.NewEncoder(w).Encode(&result);err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
 			}
 		}
 		

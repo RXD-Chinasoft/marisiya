@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"strings"
+	. "marisiya/protocal"
 )
 
 type FriendsArray struct {
@@ -181,40 +182,52 @@ func RetrieveCommonFriends(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandleSubscribe(w http.ResponseWriter, r *http.Request) {
-	// http.Error(w, http.StatusText(200), 200)
-	if r.Method == "POST" {
-		res, err := ioutil.ReadAll(r.Body)
-		r.Body.Close()
-		if err != nil {
-			log.Printf("err %s \n", res)
-			http.Error(w, http.StatusText(http.StatusBadRequest), 400)
-		} else {
-			log.Printf("%s \n", string(res))
-			param := RequestForSubscribe{}
-			err = json.NewDecoder(strings.NewReader(string(res))).Decode(&param)
-			log.Printf("%+v \n", param)
+func HandleSubscribe(mchan <-chan Message) func (w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			res, err := ioutil.ReadAll(r.Body)
+			r.Body.Close()
 			if err != nil {
+				log.Printf("err %s \n", res)
 				http.Error(w, http.StatusText(http.StatusBadRequest), 400)
-			}
-			success, err1 := db.Subscribe(param.Requestor, param.Target)
-			result := Result{}
-			if err1 != nil {
-				result.Reseason = err1.Error()
-				result.Success = false
-				http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
 			} else {
-				result.Reseason = ""
-				result.Success = success
-				if err = json.NewEncoder(w).Encode(&result);err != nil {
-					http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
+				log.Printf("%s \n", string(res))
+				param := RequestForSubscribe{}
+				err = json.NewDecoder(strings.NewReader(string(res))).Decode(&param)
+				log.Printf("%+v \n", param)
+				if err != nil {
+					http.Error(w, http.StatusText(http.StatusBadRequest), 400)
 				}
+				success, err1 := db.Subscribe(param.Requestor, param.Target)
+				result := Result{}
+				if err1 != nil {
+					result.Reseason = err1.Error()
+					result.Success = false
+					http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
+				} else {
+					result.Reseason = ""
+					result.Success = success
+					if err = json.NewEncoder(w).Encode(&result);err != nil {
+						http.Error(w, http.StatusText(http.StatusInternalServerError), 500)
+					} else {
+						go func() {
+							for {
+								message := <- mchan
+								log.Println("subscribe message", message)
+								// _, err = db.AddFriend(message) //test
+								// if err != nil {
+								// 	log.Println("Add friend fail: ", err)
+								// }
+							}
+						}()
+					}
+				}
+				
 			}
 			
+		} else {
+			http.Error(w, http.StatusText(http.StatusBadRequest), 400)
 		}
-		
-	} else {
-		http.Error(w, http.StatusText(http.StatusBadRequest), 400)
 	}
 }
 

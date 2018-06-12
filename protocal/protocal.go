@@ -21,3 +21,9 @@ type Message struct {
 	Data interface{} `json:"data"`
 	Cmd string `json:"cmd"`
 }
+
+type Publish struct {
+	Emails []string `json:"emails"`
+	Message string `json:"message"`
+
+}

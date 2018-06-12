@@ -1,6 +1,10 @@
 package handlers
 
 import (
+	"strconv"
+	"strings"
+	"fmt"
+	// "encoding/json"
 	"net/http"
 	"log"
 	"html/template"
@@ -116,10 +120,37 @@ func HandleHomeByChan(wsChan *WsChan) func (w http.ResponseWriter, r *http.Reque
 						wsChan.C.WriteJSON("add friend successfully")
 					}
 				case CMD_PUBLISH:
-					if message.Data == nil {
+					if message.Data == nil || message.Data == "" {
 						wsChan.C.WriteJSON("wrong data")
 					} else {
-						log.Println("CMD_PUBLISH: ", message.Data)
+						switch t := message.Data.(type) {
+						default:
+							fmt.Printf("unexpected type %T \n", t)
+						}
+						log.Printf("CMD_PUBLISH data: %v, %T\n", message.Data, message.Data)
+						if publish, ok := message.Data.(map[string]interface{});!ok {
+							wsChan.C.WriteJSON("wrong data")
+						} else {
+							friend, err := db.GetInfoByEmail(publish["email"].(string))
+							if err != nil {
+								wsChan.C.WriteJSON(err.Error())
+							} else {
+								log.Println("CMD_PUBLISH: ", friend)
+								pbs := Publish{Emails:[]string{}}
+								for _, v := range friend.SubscribMgr {
+									if i, err := strconv.Atoi(strings.Split(v, ",")[1]);err != nil {
+										wsChan.C.WriteJSON(err.Error())
+									} else {
+										if i == 1 {
+											pbs.Emails = append(pbs.Emails, strings.Split(v, ",")[0])
+										}
+									}
+								}
+								pbs.Message = publish["message"].(string)
+								wsChan.C.WriteJSON(pbs)
+							}
+						}
+						
 					}
 					
 				default:

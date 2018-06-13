@@ -319,6 +319,7 @@
                 var input = document.getElementById("mention");
                 var opt = smSelect.options[smSelect.selectedIndex];
                 console.log(opt.text, input.value)
+                post("/retreiveSubscribeMentionedFriends", { sender:opt.text, text: input.value });
                 return false;
             };
             document.getElementById("close").onclick = function (evt) {

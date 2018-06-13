@@ -190,12 +190,12 @@ func Block(requstor string, target string) (success bool, err error) {
 	return
 }
 
-func FindMentionedSubedEmails(sender string, mention string) ([]Friend, error) {
+func FindMentionedSubedEmails(sender string, mention string) ([]string, error) {
 	list, err := GetAll()
 	if err != nil {
 		return nil, err
 	}
-	filters := []Friend{}
+	filters := []string{}
 	for _, v := range list {
 		if v.Email != sender {
 			subscribeRelation := false
@@ -204,7 +204,7 @@ func FindMentionedSubedEmails(sender string, mention string) ([]Friend, error) {
 				if strings.Split(sm, ",")[0] == sender {
 					subscribeRelation = true
 					if strings.Split(sm, ",")[1] == "1" {
-						filters = append(filters, v)
+						filters = append(filters, v.Email)
 						hasAppended = true
 					}
 					break
@@ -213,12 +213,12 @@ func FindMentionedSubedEmails(sender string, mention string) ([]Friend, error) {
 			if !subscribeRelation {
 				isFriend, _ := IsFriend(sender, v.Email)
 				if isFriend {
-					filters = append(filters, v)
+					filters = append(filters, v.Email)
 					hasAppended = true
 				}
 				if !hasAppended {
 					if mention == v.Email {
-						filters = append(filters, v)
+						filters = append(filters, v.Email)
 					}
 				}
 			}

@@ -23,5 +23,6 @@ func main() {
 	http.HandleFunc("/retreiveCommonFriends", RetrieveCommonFriends)
 	http.HandleFunc("/subscribe", HandleSubscribe)
 	http.HandleFunc("/block", HandleBlock)
+	http.HandleFunc("/retreiveSubscribeMentionedFriends", HandleSubMention)
 	http.ListenAndServe(":8000", nil)
 }

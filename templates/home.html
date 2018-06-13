@@ -211,6 +211,13 @@
                                 option.innerText = "";
                                 publisher.appendChild(option);
 
+                                var smSelect = document.getElementById("smSelect");
+                                smSelect.options.length = 0;
+                                var option = document.createElement("option");
+                                option.value = 0;
+                                option.innerText = "";
+                                smSelect.appendChild(option);
+
                                 for (let index = 0; index < friends.length; index++) {
                                     var friend = friends[index];
 
@@ -242,6 +249,11 @@
                                     option.value = friend.id;
                                     option.innerText = friend.email;
                                     publisher.appendChild(option);
+
+                                    var option = document.createElement("option");
+                                    option.value = friend.id;
+                                    option.innerText = friend.email;
+                                    smSelect.appendChild(option);
                                 }
                             }
                             else {
@@ -293,9 +305,20 @@
                 var input = document.getElementById("input");
                 var opt = publisher.options[publisher.selectedIndex];
                 console.log(opt.text, input.value)
-                var message = JSON.stringify({ cmd: "publish", type: "home", data: {email:opt.text, message:input.value} })
+                var message = JSON.stringify({ cmd: "publish", type: "home", data: { email: opt.text, message: input.value } })
                 ws.send(message);
                 // print("SEND: " + message);
+                return false;
+            };
+            document.getElementById("smBtn").onclick = function (evt) {
+                var smSelect = document.getElementById("smSelect");
+                if (!smSelect.selectedIndex) {
+                    alert("no master be selected")
+                    return
+                }
+                var input = document.getElementById("mention");
+                var opt = smSelect.options[smSelect.selectedIndex];
+                console.log(opt.text, input.value)
                 return false;
             };
             document.getElementById("close").onclick = function (evt) {
@@ -342,46 +365,50 @@
         <tr>
             <td valign="top" width="50%">
                 <p>Click "Open" to create a connection to the server, "Send" to send a message to the server and "Close" to
-                    close the connection. You can publish topic and send multiple times.
-                    <p>
-                        <form>
-                            <label>WebSocket:</label>
-                            <input type="button" id="open" value="Open" style="background: green;color: white;padding: 5px 10px;" />
-                            <input type="button" id="close" value="Close" style="background: red;color: white;padding: 5px 10px;" />
-                            <p>
-                                <input id="mail" type="text" value="example@example.com" />
-                                <input type="button" id="add" value="Add friend" />
-                                <div id="friendsslaver">
-                                    <select id="host" onchange="selectHost(this)"></select>
-                                </div>
-                                <input type="button" onclick="toBeFriends()" value="To be friends" />
-                                <hr>
-                                <p>relationship</p>
-                                <div id="friends"></div>
-                                <input type="button" id="isFriend" value="Are they friends?">
-                                <hr>
-                                <!-- <p>myFriends</p>
+                    close the connection. You can publish topic and send multiple times.</p>
+                <p></p>
+                <form>
+                    <label>WebSocket:</label>
+                    <input type="button" id="open" value="Open" style="background: green;color: white;padding: 5px 10px;" />
+                    <input type="button" id="close" value="Close" style="background: red;color: white;padding: 5px 10px;" />
+                    <p></p>
+                    <input id="mail" type="text" value="example@example.com" />
+                    <input type="button" id="add" value="Add friend" />
+                    <div id="friendsslaver">
+                        <select id="host" onchange="selectHost(this)"></select>
+                    </div>
+                    <input type="button" onclick="toBeFriends()" value="To be friends" />
+                    <hr>
+                    <p>relationship</p>
+                    <div id="friends"></div>
+                    <input type="button" id="isFriend" value="Are they friends?">
+                    <hr>
+                    <!-- <p>myFriends</p>
                             <div id="myFriends"></div>
                             <input type="button" id="getMyFriends" value="Retrieves friends list">
                             <hr> -->
-                                <p>common friends</p>
-                                <div id="commonfriends"></div>
-                                <input type="button" onclick="getCommonFriends()" value="Retrieves common friends" />
-                                <hr>
+                    <p>common friends</p>
+                    <div id="commonfriends"></div>
+                    <input type="button" onclick="getCommonFriends()" value="Retrieves common friends" />
+                    <hr>
 
-                                <p>subscribe/block</p>
-                                <div id="subBlock">
-                                    <select id="requestor" onchange="selectRequestor(this)"></select>
-                                </div>
-                                <input type="button" onclick="subBlock('/subscribe')" value="subscribe" />
-                                <input type="button" onclick="subBlock('/block')" value="block" />
-                                <p>
-                                    <select id="publisher"></select>
-                                    <input id="input" type="text" value="topic one!" />
-                                    <input type="button" id="send" value="Publish topic" />
-                                    <hr>
-                                    <p>
-                        </form>
+                    <p>subscribe/block</p>
+                    <div id="subBlock">
+                        <select id="requestor" onchange="selectRequestor(this)"></select>
+                    </div>
+                    <input type="button" onclick="subBlock('/subscribe')" value="subscribe" />
+                    <input type="button" onclick="subBlock('/block')" value="block" />
+                    <p></p>
+                    <select id="publisher"></select>
+                    <input id="input" type="text" value="topic one!" />
+                    <input type="button" id="send" value="Publish topic" />
+                    <hr>
+                    <p>subscribe/metioned</p>
+                    <select id="smSelect"></select>
+                    <input id="mention" type="text" value="hello! " />
+                    <input type="button" id="smBtn" value="Subscribe/metioned" />
+                    <hr>
+                </form>
             </td>
             <td valign="top" width="50%">
                 <div id="output"></div>
